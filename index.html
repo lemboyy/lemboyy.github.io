@@ -116,7 +116,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">1</span>
+          <span class="site-state-item-count">2</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
@@ -146,6 +146,75 @@
 
 
     <div class="main-inner index posts-expand">
+
+    
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/05/19/Spring%E4%B8%ADbean%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E6%B5%81%E7%A8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Lemboyy">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Lemboyy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="undefined | Lemboyy">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          <a href="/2022/05/19/Spring%E4%B8%ADbean%E7%9A%84%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E6%B5%81%E7%A8%8B/" class="post-title-link" itemprop="url">Spring中bean的生命周期流程</a>
+        </h2>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2022-05-19 16:01:40 / Modified: 16:02:03" itemprop="dateCreated datePublished" datetime="2022-05-19T16:01:40+08:00">2022-05-19</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+          
+      
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+</div>
+
+
+
 
     
 
@@ -191,7 +260,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">Edited on</span>
-      <time title="Modified: 2022-05-19 14:13:44" itemprop="dateModified" datetime="2022-05-19T14:13:44+08:00">2022-05-19</time>
+      <time title="Modified: 2022-05-19 16:00:41" itemprop="dateModified" datetime="2022-05-19T16:00:41+08:00">2022-05-19</time>
     </span>
 
   
@@ -210,7 +279,7 @@
 <li>setter循环依赖</li>
 <li>prototype范围的循环依赖</li>
 </ul>
-<p>对于构造器注入构成的循环依赖是无法解决的，会抛出BeanCurrentlyInCreationException异常<br><br>对于setter注入方式构成的循环依赖，spring容器通过三级缓存提前暴露来解决<br><br>![123](&#x2F;Users&#x2F;lemboyy&#x2F;Project&#x2F;lemboyy.github.io&#x2F;source&#x2F;image.spring&#x2F;截屏2022-05-19 14.12.33.png)</p>
+<p>####对于构造器注入构成的循环依赖是无法解决的，会抛出BeanCurrentlyInCreationException异常<br><br>####对于setter注入方式构成的循环依赖，spring容器通过三级缓存提前暴露来解决，下面看一下源码<br><br><img src="/Users/lemboyy/Project/lemboyy.github.io/source/image.spring/%E4%B8%89%E7%BA%A7%E7%BC%93%E5%AD%98%E6%BA%90%E7%A0%81.png" alt="三级缓存"><br>上面我们可以看到有三个缓存map，分别对应一级缓存（完整的bean）、三级缓存（缓存的是bean工厂）、三级缓存（从工厂初始化的bean）<br><img src="/Users/lemboyy/Project/lemboyy.github.io/source/image.spring/%E5%88%9B%E5%BB%BAbean%E7%9A%84%E4%B8%89%E7%BA%A7%E7%BC%93%E5%AD%98%E6%BA%90%E7%A0%81.png" alt="创建bean流程"><br>我们从源码能够看到初始化bean的时候，会先从singletonObjects一级缓存去获取，如果获取为空并且标记为正在创建，那我们则会到二级缓存earlySingletonObjects中去拿<br>，如果还是没有拿到并且我们允许循环依赖（默认传的是true），将同步再从一级缓存二级缓存中去获取，依然为空的话我们的三级缓存singletonFactories就登场了，这里获取的是此bean的工厂，通过getobject()方法获取我们的bean，最后将获取到的bean放入二级缓存并且从三级缓存中移除。<br>下面是bean创建前，提前暴露beanFactory的源码<br><img src="/Users/lemboyy/Project/lemboyy.github.io/source/image.spring/%E4%B8%A2%E8%BF%9B%E4%B8%89%E7%BA%A7%E7%BC%93%E5%AD%98%E6%BA%90%E7%A0%81.png" alt="创建bean流程"><br>为什么不是两级缓存而是三级缓存？这个涉及到bean生命周期和循环依赖优先级问题，简单先说一下因为如果bean被代理每次去通过beanFactory通过getobject()方法获取到的代理对象都是新生成的代理对象，这样bean就不是单例的了，所以需要借助二级缓存来存入代理对象<br>####对于原型模式的bean，spring容器无法完成依赖注入，因为spring容器不进行缓存prototype作用域的bean，因此无法暴露一个创建中的bean,会报错BeanCurrentlyInCreationException</p>
 
       
     </div>
