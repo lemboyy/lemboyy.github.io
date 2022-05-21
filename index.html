@@ -183,9 +183,15 @@
         <i class="far fa-calendar"></i>
       </span>
       <span class="post-meta-item-text">Posted on</span>
-      
 
-      <time title="Created: 2022-05-19 16:01:40 / Modified: 19:16:16" itemprop="dateCreated datePublished" datetime="2022-05-19T16:01:40+08:00">2022-05-19</time>
+      <time title="Created: 2022-05-19 16:01:40" itemprop="dateCreated datePublished" datetime="2022-05-19T16:01:40+08:00">2022-05-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2022-05-21 16:28:32" itemprop="dateModified" datetime="2022-05-21T16:28:32+08:00">2022-05-21</time>
     </span>
 
   
@@ -199,6 +205,14 @@
     
     <div class="post-body" itemprop="articleBody">
           <h3 id="Spring中Bean的生命周期大概可以归纳成下面的流程"><a href="#Spring中Bean的生命周期大概可以归纳成下面的流程" class="headerlink" title="Spring中Bean的生命周期大概可以归纳成下面的流程"></a>Spring中Bean的生命周期大概可以归纳成下面的流程</h3><p><img src="/../image.spring/%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E6%B5%81%E7%A8%8B%E5%9B%BE.png" alt="生命周期流程图"></p>
+<h3 id="下面看一下Spring中bean生命周期源码"><a href="#下面看一下Spring中bean生命周期源码" class="headerlink" title="下面看一下Spring中bean生命周期源码"></a>下面看一下Spring中bean生命周期源码</h3><p><img src="/../image.spring/bean%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F.png" alt="生命周期源码"><br>我们重点关注下面几个方法</p>
+<h4 id="实例化方法：createBeanInstance-beanName-mbd-args"><a href="#实例化方法：createBeanInstance-beanName-mbd-args" class="headerlink" title="实例化方法：createBeanInstance(beanName,mbd,args)"></a>实例化方法：createBeanInstance(beanName,mbd,args)</h4><p><img src="/../image.spring/bean%E5%AE%9E%E4%BE%8B%E5%8C%96%E6%96%B9%E6%B3%95.png" alt="生命周期实例化方法"><br>这个方法简单总结一下就是如果设置了factory-method属性就会调用工厂方法实例化，如果没有就会根据构造函数的参数来确定调用哪个构造函数，因为一个类中可能有多个构造函数，Spring根据参数及类型去锁定，这里还做了解析缓存操作。<br>具体怎么实例化的，这里不再深究，就是通过反射，如果有replace和lookup配置方法，spring会通过动态代理cglib策略去实例化</p>
+<h4 id="属性填充方法：populateBean-beanName-mbd-instanceWrapper"><a href="#属性填充方法：populateBean-beanName-mbd-instanceWrapper" class="headerlink" title="属性填充方法：populateBean(beanName,mbd,instanceWrapper)"></a>属性填充方法：populateBean(beanName,mbd,instanceWrapper)</h4><p><img src="/../image.spring/bean%E5%B1%9E%E6%80%A7%E5%A1%AB%E5%85%85.png" alt="生命周期bean属性填充"><br>这里就是做属性的填充工作，比如我们常用的@Autowire注解的填充处理，根据类型和名称，然后再把我们得到的属性值设置到bean中，在填充前，还会给InstantiationAwareBeanPostProcessor一次机会改变填充前的bean和是否执行填充流程</p>
+<h4 id="初始化方法：initializeBean-beanName-exposedObject-mbd"><a href="#初始化方法：initializeBean-beanName-exposedObject-mbd" class="headerlink" title="初始化方法：initializeBean(beanName,exposedObject,mbd)"></a>初始化方法：initializeBean(beanName,exposedObject,mbd)</h4><p><img src="/../image.spring/bean%E5%88%9D%E5%A7%8B%E5%8C%96.png" alt="生命周期bean初始化"></p>
+<h5 id="Aware接口的处理"><a href="#Aware接口的处理" class="headerlink" title="Aware接口的处理"></a>Aware接口的处理</h5><p><img src="/../image.spring/Aware%E6%8E%A5%E5%8F%A3%E7%9A%84%E5%A4%84%E7%90%86.png" alt="生命周期bean Aware接口实现处理"><br>如果bean实现了BeanNameAware接口则会调用setBeanName()方法，如果实现了BeanClassLoaderAware接口则会调用setBeanClassLoader()方法，如果实现了BeanFactoryAware接口则会调用setBeanFactory()方法</p>
+<h5 id="BeanPostProcessor的postProcessorBeforeInitialization-方法"><a href="#BeanPostProcessor的postProcessorBeforeInitialization-方法" class="headerlink" title="BeanPostProcessor的postProcessorBeforeInitialization()方法"></a>BeanPostProcessor的postProcessorBeforeInitialization()方法</h5><p><img src="/../image.spring/postProcessor%E7%9A%84before%E6%96%B9%E6%B3%95.png" alt="生命周期bean before方法"></p>
+<h5 id="init-method的调用"><a href="#init-method的调用" class="headerlink" title="init-method的调用"></a>init-method的调用</h5><p><img src="/../image.spring/init-method.png" alt="生命周期bean init-method方法"><br>如果bean实现了InitializingBean的afterPropertiesSet()方法则会在初始化方法前调用，然后调用我们的init-method初始化方法</p>
+<h5 id="BeanPostProcessor的postProcessorAfterInitialization-方法"><a href="#BeanPostProcessor的postProcessorAfterInitialization-方法" class="headerlink" title="BeanPostProcessor的postProcessorAfterInitialization()方法"></a>BeanPostProcessor的postProcessorAfterInitialization()方法</h5><p><img src="/../image.spring/postProcessor%E7%9A%84after%E6%96%B9%E6%B3%95.png" alt="生命周期bean before方法"></p>
 
       
     </div>
